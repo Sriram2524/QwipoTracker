@@ -1,0 +1,39 @@
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/not-found";
+import CustomersPage from "@/pages/customers";
+import CustomerDetailPage from "@/pages/customer-detail";
+import CustomerFormPage from "@/pages/customer-form";
+import Navigation from "@/components/navigation";
+
+function Router() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <Switch>
+        <Route path="/" component={CustomersPage} />
+        <Route path="/customers" component={CustomersPage} />
+        <Route path="/customers/:id" component={CustomerDetailPage} />
+        <Route path="/customers/:id/edit" component={CustomerFormPage} />
+        <Route path="/customers/new" component={CustomerFormPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
