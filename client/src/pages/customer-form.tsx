@@ -17,11 +17,14 @@ import { useToast } from "@/hooks/use-toast";
 import type { CustomerWithAddresses } from "@shared/schema";
 
 const customerFormSchema = insertCustomerSchema.extend({
+  firstName: z.string().min(2, "First name must be at least 2 characters").max(50, "First name must be less than 50 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters").max(50, "Last name must be less than 50 characters"),
+  phoneNumber: z.string().regex(/^\+91\s\d{5}\s\d{5}$/, "Phone number must be in format: +91 XXXXX XXXXX"),
   // Primary address fields
-  addressDetails: z.string().min(1, "Address details are required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  pinCode: z.string().regex(/^\d{6}$/, "PIN code must be 6 digits"),
+  addressDetails: z.string().min(10, "Address details must be at least 10 characters").max(200, "Address details must be less than 200 characters"),
+  city: z.string().min(2, "City name must be at least 2 characters").max(50, "City name must be less than 50 characters"),
+  state: z.string().min(2, "State name must be at least 2 characters").max(50, "State name must be less than 50 characters"),
+  pinCode: z.string().regex(/^\d{6}$/, "PIN code must be exactly 6 digits"),
 });
 
 type CustomerFormData = z.infer<typeof customerFormSchema>;
@@ -35,6 +38,14 @@ export default function CustomerFormPage() {
 
   const { data: customer, isLoading } = useQuery<CustomerWithAddresses>({
     queryKey: ["/api/customers", customerId?.toString()],
+    queryFn: async () => {
+      const response = await fetch(`/api/customers/${customerId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer');
+      }
+      const result = await response.json();
+      return result.data;
+    },
     enabled: isEdit && !!customerId,
   });
 

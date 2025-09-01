@@ -23,6 +23,14 @@ export default function CustomerDetailPage() {
 
   const { data: customer, isLoading, error } = useQuery<CustomerWithAddresses>({
     queryKey: ["/api/customers", customerId.toString()],
+    queryFn: async () => {
+      const response = await fetch(`/api/customers/${customerId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer');
+      }
+      const result = await response.json();
+      return result.data;
+    },
     enabled: !!customerId && !isNaN(customerId),
   });
 

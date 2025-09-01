@@ -20,7 +20,7 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
   return (
     <Card className="mb-6">
       <CardContent className="p-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Label htmlFor="search" className="block text-sm font-medium text-foreground mb-2">
               Search Customers
@@ -76,13 +76,13 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
             </Select>
           </div>
           
-          <div className="flex items-end">
-            <div className="space-x-2">
-              <Button variant="secondary" data-testid="button-apply-filters">
+          <div className="flex items-end sm:col-span-2 lg:col-span-1">
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="secondary" className="flex-1 sm:flex-none" data-testid="button-apply-filters">
                 <Filter className="mr-2 h-4 w-4" />
                 Apply Filters
               </Button>
-              <Button variant="ghost" onClick={onClearFilters} data-testid="button-clear-filters">
+              <Button variant="ghost" className="flex-1 sm:flex-none" onClick={onClearFilters} data-testid="button-clear-filters">
                 <X className="mr-2 h-4 w-4" />
                 Clear
               </Button>

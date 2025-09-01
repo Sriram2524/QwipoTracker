@@ -99,34 +99,39 @@ export class MemStorage implements IStorage {
       return { ...customer, addresses: customerAddresses };
     });
 
-    // Filter by search term
+    // Filter by search term (case-insensitive)
     if (search) {
       const searchLower = search.toLowerCase();
       customersWithAddresses = customersWithAddresses.filter(customer =>
         customer.firstName.toLowerCase().includes(searchLower) ||
         customer.lastName.toLowerCase().includes(searchLower) ||
-        customer.phoneNumber.includes(search)
+        customer.phoneNumber.toLowerCase().includes(searchLower) ||
+        customer.addresses.some(address => 
+          address.city.toLowerCase().includes(searchLower) ||
+          address.state.toLowerCase().includes(searchLower) ||
+          address.pinCode.includes(search)
+        )
       );
     }
 
-    // Filter by city
+    // Filter by city (case-insensitive)
     if (city && city !== 'All Cities') {
       customersWithAddresses = customersWithAddresses.filter(customer =>
-        customer.addresses.some(address => address.city === city)
+        customer.addresses.some(address => address.city.toLowerCase() === city.toLowerCase())
       );
     }
 
-    // Filter by state
+    // Filter by state (case-insensitive)
     if (state && state !== 'All States') {
       customersWithAddresses = customersWithAddresses.filter(customer =>
-        customer.addresses.some(address => address.state === state)
+        customer.addresses.some(address => address.state.toLowerCase() === state.toLowerCase())
       );
     }
 
     // Filter by pinCode
     if (pinCode) {
       customersWithAddresses = customersWithAddresses.filter(customer =>
-        customer.addresses.some(address => address.pinCode === pinCode)
+        customer.addresses.some(address => address.pinCode.includes(pinCode))
       );
     }
 

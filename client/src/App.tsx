@@ -7,6 +7,8 @@ import NotFound from "@/pages/not-found";
 import CustomersPage from "@/pages/customers";
 import CustomerDetailPage from "@/pages/customer-detail";
 import CustomerFormPage from "@/pages/customer-form";
+import ReportsPage from "@/pages/reports";
+import SettingsPage from "@/pages/settings";
 import Navigation from "@/components/navigation";
 
 function Router() {
@@ -19,6 +21,8 @@ function Router() {
         <Route path="/customers/:id" component={CustomerDetailPage} />
         <Route path="/customers/:id/edit" component={CustomerFormPage} />
         <Route path="/customers/new" component={CustomerFormPage} />
+        <Route path="/reports" component={ReportsPage} />
+        <Route path="/settings" component={SettingsPage} />
         <Route component={NotFound} />
       </Switch>
     </div>

@@ -27,18 +27,16 @@ export default function Navigation() {
                   Customers
                 </span>
               </Link>
-              <a
-                href="#"
-                className="border-transparent text-muted-foreground hover:border-border hover:text-foreground border-b-2 py-2 px-1 text-sm font-medium"
-              >
-                Reports
-              </a>
-              <a
-                href="#"
-                className="border-transparent text-muted-foreground hover:border-border hover:text-foreground border-b-2 py-2 px-1 text-sm font-medium"
-              >
-                Settings
-              </a>
+              <Link href="/reports">
+                <span className="border-transparent text-muted-foreground hover:border-border hover:text-foreground border-b-2 py-2 px-1 text-sm font-medium cursor-pointer">
+                  Reports
+                </span>
+              </Link>
+              <Link href="/settings">
+                <span className="border-transparent text-muted-foreground hover:border-border hover:text-foreground border-b-2 py-2 px-1 text-sm font-medium cursor-pointer">
+                  Settings
+                </span>
+              </Link>
             </div>
           </div>
           <div className="flex items-center">
