@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,8 +6,36 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Settings, Bell, Shield, Palette } from "lucide-react";
 import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
+  const { toast } = useToast();
+  const [pageSize, setPageSize] = useState(10);
+  const [emailNotifications, setEmailNotifications] = useState(false);
+  const [successMessages, setSuccessMessages] = useState(true);
+  const [autoLogout, setAutoLogout] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const [compactView, setCompactView] = useState(false);
+
+  const handleSaveSettings = () => {
+    // Here you would normally save to a backend or localStorage
+    localStorage.setItem('appSettings', JSON.stringify({
+      pageSize,
+      emailNotifications,
+      successMessages,
+      autoLogout,
+      deleteConfirmation,
+      darkMode,
+      compactView
+    }));
+    
+    toast({
+      title: "Settings Saved",
+      description: "Your preferences have been successfully updated.",
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
@@ -43,7 +72,14 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="page-size">Items per page</Label>
-                <Input id="page-size" type="number" defaultValue="10" min="5" max="50" />
+                <Input 
+                  id="page-size" 
+                  type="number" 
+                  value={pageSize} 
+                  onChange={(e) => setPageSize(parseInt(e.target.value))} 
+                  min="5" 
+                  max="50" 
+                />
               </div>
               <div>
                 <Label htmlFor="default-sort">Default sort order</Label>
@@ -67,14 +103,14 @@ export default function SettingsPage() {
                 <Label>Email notifications</Label>
                 <p className="text-sm text-muted-foreground">Receive email updates when customers are added</p>
               </div>
-              <Switch />
+              <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Success messages</Label>
                 <p className="text-sm text-muted-foreground">Show success toasts for actions</p>
               </div>
-              <Switch defaultChecked />
+              <Switch checked={successMessages} onCheckedChange={setSuccessMessages} />
             </div>
           </CardContent>
         </Card>
@@ -93,14 +129,14 @@ export default function SettingsPage() {
                 <Label>Auto-logout</Label>
                 <p className="text-sm text-muted-foreground">Automatically log out after inactivity</p>
               </div>
-              <Switch />
+              <Switch checked={autoLogout} onCheckedChange={setAutoLogout} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Delete confirmation</Label>
                 <p className="text-sm text-muted-foreground">Require confirmation before deleting records</p>
               </div>
-              <Switch defaultChecked />
+              <Switch checked={deleteConfirmation} onCheckedChange={setDeleteConfirmation} />
             </div>
           </CardContent>
         </Card>
@@ -119,14 +155,14 @@ export default function SettingsPage() {
                 <Label>Dark mode</Label>
                 <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
               </div>
-              <Switch />
+              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Compact view</Label>
                 <p className="text-sm text-muted-foreground">Use smaller spacing for better information density</p>
               </div>
-              <Switch />
+              <Switch checked={compactView} onCheckedChange={setCompactView} />
             </div>
           </CardContent>
         </Card>
@@ -134,7 +170,7 @@ export default function SettingsPage() {
 
       {/* Save Button */}
       <div className="mt-8 flex justify-end">
-        <Button>Save Settings</Button>
+        <Button onClick={handleSaveSettings}>Save Settings</Button>
       </div>
     </div>
   );

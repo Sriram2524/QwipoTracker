@@ -19,7 +19,7 @@ import type { CustomerWithAddresses } from "@shared/schema";
 const customerFormSchema = insertCustomerSchema.extend({
   firstName: z.string().min(2, "First name must be at least 2 characters").max(50, "First name must be less than 50 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters").max(50, "Last name must be less than 50 characters"),
-  phoneNumber: z.string().regex(/^\+91\s\d{5}\s\d{5}$/, "Phone number must be in format: +91 XXXXX XXXXX"),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 characters").max(20, "Phone number must be less than 20 characters"),
   // Primary address fields
   addressDetails: z.string().min(10, "Address details must be at least 10 characters").max(200, "Address details must be less than 200 characters"),
   city: z.string().min(2, "City name must be at least 2 characters").max(50, "City name must be less than 50 characters"),
@@ -30,10 +30,13 @@ const customerFormSchema = insertCustomerSchema.extend({
 type CustomerFormData = z.infer<typeof customerFormSchema>;
 
 export default function CustomerFormPage() {
-  const [, params] = useRoute("/customers/:id/edit");
+  const [, editParams] = useRoute("/customers/:id/edit");
+  const [, newParams] = useRoute("/customers/new");
   const [, setLocation] = useLocation();
-  const customerId = params?.id ? parseInt(params.id) : null;
-  const isEdit = !!customerId;
+  
+  const customerId = editParams?.id ? parseInt(editParams.id) : null;
+  const isEdit = !!customerId && !isNaN(customerId);
+  const isNew = !!newParams;
   const { toast } = useToast();
 
   const { data: customer, isLoading } = useQuery<CustomerWithAddresses>({
@@ -63,7 +66,7 @@ export default function CustomerFormPage() {
   });
 
   // Update form values when customer data is loaded
-  if (isEdit && customer && !form.formState.isDirty) {
+  if (isEdit && customer && !form.formState.isDirty && !isNew) {
     const primaryAddress = customer.addresses[0];
     form.reset({
       firstName: customer.firstName,
@@ -159,7 +162,7 @@ export default function CustomerFormPage() {
     }
   };
 
-  if (isEdit && isLoading) {
+  if (isEdit && isLoading && !isNew) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Skeleton className="h-8 w-48 mb-6" />

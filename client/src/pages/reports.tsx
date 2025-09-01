@@ -2,8 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart3, Users, MapPin } from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ReportsPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["/api/customers"],
+    queryFn: async () => {
+      const response = await fetch('/api/customers?limit=1000');
+      if (!response.ok) {
+        throw new Error('Failed to fetch customers');
+      }
+      return response.json();
+    },
+  });
+
+  const customers = data?.data || [];
+  const totalCustomers = customers.length;
+  const totalAddresses = customers.reduce((acc: number, customer: any) => acc + customer.addresses.length, 0);
+  const uniqueCities = new Set(customers.flatMap((customer: any) => customer.addresses.map((addr: any) => addr.city))).size;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
@@ -34,7 +52,11 @@ export default function ReportsPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 mb-1" />
+            ) : (
+              <div className="text-2xl font-bold">{totalCustomers}</div>
+            )}
             <p className="text-xs text-muted-foreground">Active customer records</p>
           </CardContent>
         </Card>
@@ -45,7 +67,11 @@ export default function ReportsPage() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 mb-1" />
+            ) : (
+              <div className="text-2xl font-bold">{totalAddresses}</div>
+            )}
             <p className="text-xs text-muted-foreground">Registered addresses</p>
           </CardContent>
         </Card>
@@ -56,7 +82,11 @@ export default function ReportsPage() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-12 mb-1" />
+            ) : (
+              <div className="text-2xl font-bold">{uniqueCities}</div>
+            )}
             <p className="text-xs text-muted-foreground">Different cities</p>
           </CardContent>
         </Card>
