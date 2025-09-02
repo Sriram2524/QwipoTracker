@@ -9,6 +9,7 @@ import { useState } from "react";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/contexts/settings-context";
 import AddressForm from "@/components/address-form";
 import DeleteConfirmation from "@/components/delete-confirmation";
 import type { CustomerWithAddresses, Address } from "@shared/schema";
@@ -20,6 +21,7 @@ export default function CustomerDetailPage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [deleteAddressId, setDeleteAddressId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { settings } = useSettings();
 
   const { data: customer, isLoading, error } = useQuery<CustomerWithAddresses>({
     queryKey: ["/api/customers", customerId.toString()],
@@ -47,6 +49,14 @@ export default function CustomerDetailPage() {
       toast({ title: "Error", description: "Failed to delete address", variant: "destructive" });
     },
   });
+
+  const handleDeleteAddressClick = (addressId: number) => {
+    if (settings.deleteConfirmation) {
+      setDeleteAddressId(addressId);
+    } else {
+      deleteAddressMutation.mutate(addressId);
+    }
+  };
 
   const getInitials = (firstName: string, lastName: string) => {
     return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
@@ -262,7 +272,8 @@ export default function CustomerDetailPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setDeleteAddressId(address.id)}
+                            onClick={() => handleDeleteAddressClick(address.id)}
+                            disabled={deleteAddressMutation.isPending}
                             data-testid={`button-delete-address-${address.id}`}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -291,7 +302,7 @@ export default function CustomerDetailPage() {
       )}
 
       {/* Delete Address Confirmation */}
-      {deleteAddressId && (
+      {deleteAddressId && settings.deleteConfirmation && (
         <DeleteConfirmation
           type="address"
           addressId={deleteAddressId}

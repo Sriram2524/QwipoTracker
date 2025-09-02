@@ -7,6 +7,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/contexts/settings-context";
 import DeleteConfirmation from "./delete-confirmation";
 import type { CustomerWithAddresses } from "@shared/schema";
 
@@ -33,9 +38,28 @@ export default function CustomerList({
   onSortChange,
   compactView = false,
 }: CustomerListProps) {
+  const { settings } = useSettings();
+  const { toast } = useToast();
   const [deleteCustomerId, setDeleteCustomerId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const deleteCustomerMutation = useMutation({
+    mutationFn: async (customerId: number) => {
+      return apiRequest("DELETE", `/api/customers/${customerId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/customers"] });
+      toast({ title: "Success", description: "Customer deleted successfully" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to delete customer", 
+        variant: "destructive" 
+      });
+    },
+  });
 
   const totalPages = Math.ceil(total / pageSize);
   const startIndex = (currentPage - 1) * pageSize + 1;
@@ -46,6 +70,14 @@ export default function CustomerList({
     setSortBy(newSortBy);
     setSortOrder(newSortOrder as 'asc' | 'desc');
     onSortChange(newSortBy, newSortOrder as 'asc' | 'desc');
+  };
+
+  const handleDeleteClick = (customerId: number) => {
+    if (settings.deleteConfirmation) {
+      setDeleteCustomerId(customerId);
+    } else {
+      deleteCustomerMutation.mutate(customerId);
+    }
   };
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -198,7 +230,8 @@ export default function CustomerList({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setDeleteCustomerId(customer.id)}
+                            onClick={() => handleDeleteClick(customer.id)}
+                            disabled={deleteCustomerMutation.isPending}
                             data-testid={`button-delete-${customer.id}`}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
