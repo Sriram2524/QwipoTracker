@@ -1,9 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Filter, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 interface CustomerFiltersProps {
   filters: {
@@ -20,7 +19,7 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
   return (
     <Card className="mb-6">
       <CardContent className="p-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <Label htmlFor="search" className="block text-sm font-medium text-foreground mb-2">
               Search Customers
@@ -32,7 +31,7 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
               <Input
                 id="search"
                 data-testid="input-search"
-                placeholder="Search by name or phone..."
+                placeholder="Search by name, phone, city, state, or pincode..."
                 value={filters.search}
                 onChange={(e) => onFilterChange({ search: e.target.value })}
                 className="pl-10"
@@ -44,49 +43,46 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
             <Label htmlFor="city-filter" className="block text-sm font-medium text-foreground mb-2">
               City
             </Label>
-            <Select value={filters.city} onValueChange={(value) => onFilterChange({ city: value })}>
-              <SelectTrigger data-testid="select-city">
-                <SelectValue placeholder="All Cities" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Cities">All Cities</SelectItem>
-                <SelectItem value="Mumbai">Mumbai</SelectItem>
-                <SelectItem value="Delhi">Delhi</SelectItem>
-                <SelectItem value="Bangalore">Bangalore</SelectItem>
-                <SelectItem value="Chennai">Chennai</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              id="city-filter"
+              data-testid="input-city"
+              placeholder="Filter by city..."
+              value={filters.city}
+              onChange={(e) => onFilterChange({ city: e.target.value })}
+            />
           </div>
           
           <div>
             <Label htmlFor="state-filter" className="block text-sm font-medium text-foreground mb-2">
               State
             </Label>
-            <Select value={filters.state} onValueChange={(value) => onFilterChange({ state: value })}>
-              <SelectTrigger data-testid="select-state">
-                <SelectValue placeholder="All States" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All States">All States</SelectItem>
-                <SelectItem value="Maharashtra">Maharashtra</SelectItem>
-                <SelectItem value="Delhi">Delhi</SelectItem>
-                <SelectItem value="Karnataka">Karnataka</SelectItem>
-                <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              id="state-filter"
+              data-testid="input-state"
+              placeholder="Filter by state..."
+              value={filters.state}
+              onChange={(e) => onFilterChange({ state: e.target.value })}
+            />
           </div>
           
-          <div className="flex items-end sm:col-span-2 lg:col-span-1">
-            <div className="flex flex-col sm:flex-row gap-2 w-full">
-              <Button variant="secondary" className="flex-1 sm:flex-none" data-testid="button-apply-filters">
-                <Filter className="mr-2 h-4 w-4" />
-                Apply Filters
-              </Button>
-              <Button variant="ghost" className="flex-1 sm:flex-none" onClick={onClearFilters} data-testid="button-clear-filters">
-                <X className="mr-2 h-4 w-4" />
-                Clear
-              </Button>
-            </div>
+          <div>
+            <Label htmlFor="pincode-filter" className="block text-sm font-medium text-foreground mb-2">
+              Pincode
+            </Label>
+            <Input
+              id="pincode-filter"
+              data-testid="input-pincode"
+              placeholder="Filter by pincode..."
+              value={filters.pinCode}
+              onChange={(e) => onFilterChange({ pinCode: e.target.value })}
+            />
+          </div>
+          
+          <div className="flex items-end">
+            <Button variant="outline" className="w-full" onClick={onClearFilters} data-testid="button-clear-filters">
+              <X className="mr-2 h-4 w-4" />
+              Clear All
+            </Button>
           </div>
         </div>
       </CardContent>

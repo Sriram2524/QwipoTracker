@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { eq, and, or, like, desc, asc, count } from "drizzle-orm";
+import { eq, and, or, like, desc, asc, count, inArray } from "drizzle-orm";
 import { customers, addresses, type Customer, type InsertCustomer, type UpdateCustomer, type Address, type InsertAddress, type UpdateAddress, type CustomerWithAddresses } from "@shared/schema";
 
 export interface IStorage {
@@ -58,13 +58,38 @@ export class PostgreSQLStorage implements IStorage {
     
     if (search) {
       const searchTerm = `%${search}%`;
-      conditions.push(
-        or(
-          like(customers.firstName, searchTerm),
-          like(customers.lastName, searchTerm),
-          like(customers.phoneNumber, searchTerm)
-        )
-      );
+      // Search in customer fields and address fields
+      const customerMatches = await db.select({ id: customers.id })
+        .from(customers)
+        .where(
+          or(
+            like(customers.firstName, searchTerm),
+            like(customers.lastName, searchTerm),
+            like(customers.phoneNumber, searchTerm)
+          )
+        );
+      
+      const addressMatches = await db.select({ customerId: addresses.customerId })
+        .from(addresses)
+        .where(
+          or(
+            like(addresses.city, searchTerm),
+            like(addresses.state, searchTerm),
+            like(addresses.pinCode, searchTerm)
+          )
+        );
+      
+      const allMatchingCustomerIds = new Set([
+        ...customerMatches.map(c => c.id),
+        ...addressMatches.map(a => a.customerId)
+      ]);
+      
+      if (allMatchingCustomerIds.size > 0) {
+        conditions.push(inArray(customers.id, Array.from(allMatchingCustomerIds)));
+      } else {
+        // No matches found, return empty result
+        return { customers: [], total: 0 };
+      }
     }
 
     // Build the complete query
@@ -81,9 +106,41 @@ export class PostgreSQLStorage implements IStorage {
         orderByColumn = orderDirection(customers.firstName);
     }
 
-    // Get total count
-    const totalResult = await db.select({ count: count() }).from(customers);
-    const total = totalResult[0]?.count || 0;
+    // Get total count for customers matching the search criteria
+    let totalCount;
+    if (search) {
+      // Use the same search logic for count
+      const searchTerm = `%${search}%`;
+      const customerMatches = await db.select({ id: customers.id })
+        .from(customers)
+        .where(
+          or(
+            like(customers.firstName, searchTerm),
+            like(customers.lastName, searchTerm),
+            like(customers.phoneNumber, searchTerm)
+          )
+        );
+      
+      const addressMatches = await db.select({ customerId: addresses.customerId })
+        .from(addresses)
+        .where(
+          or(
+            like(addresses.city, searchTerm),
+            like(addresses.state, searchTerm),
+            like(addresses.pinCode, searchTerm)
+          )
+        );
+      
+      const allMatchingCustomerIds = new Set([
+        ...customerMatches.map(c => c.id),
+        ...addressMatches.map(a => a.customerId)
+      ]);
+      
+      totalCount = allMatchingCustomerIds.size;
+    } else {
+      const totalResult = await db.select({ count: count() }).from(customers);
+      totalCount = totalResult[0]?.count || 0;
+    }
 
     // Apply pagination
     const offset = (page - 1) * limit;
@@ -107,19 +164,25 @@ export class PostgreSQLStorage implements IStorage {
     for (const customer of customerResults) {
       let customerAddresses = await db.select().from(addresses).where(eq(addresses.customerId, customer.id));
       
-      // Filter addresses by location filters
-      if (city && city !== 'All Cities') {
-        customerAddresses = customerAddresses.filter(addr => addr.city.toLowerCase() === city.toLowerCase());
+      // Filter addresses by location filters (partial matches)
+      if (city && city.trim()) {
+        customerAddresses = customerAddresses.filter(addr => 
+          addr.city.toLowerCase().includes(city.toLowerCase().trim())
+        );
       }
-      if (state && state !== 'All States') {
-        customerAddresses = customerAddresses.filter(addr => addr.state.toLowerCase() === state.toLowerCase());
+      if (state && state.trim()) {
+        customerAddresses = customerAddresses.filter(addr => 
+          addr.state.toLowerCase().includes(state.toLowerCase().trim())
+        );
       }
-      if (pinCode) {
-        customerAddresses = customerAddresses.filter(addr => addr.pinCode.includes(pinCode));
+      if (pinCode && pinCode.trim()) {
+        customerAddresses = customerAddresses.filter(addr => 
+          addr.pinCode.includes(pinCode.trim())
+        );
       }
 
       // Only include customer if they have matching addresses (when location filters are applied)
-      if ((city && city !== 'All Cities') || (state && state !== 'All States') || pinCode) {
+      if ((city && city.trim()) || (state && state.trim()) || (pinCode && pinCode.trim())) {
         if (customerAddresses.length > 0) {
           customersWithAddresses.push({ ...customer, addresses: customerAddresses });
         }
@@ -128,7 +191,7 @@ export class PostgreSQLStorage implements IStorage {
       }
     }
 
-    return { customers: customersWithAddresses, total: customersWithAddresses.length };
+    return { customers: customersWithAddresses, total: totalCount };
   }
 
   async createCustomer(customer: InsertCustomer): Promise<Customer> {
