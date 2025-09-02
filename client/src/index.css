@@ -100,3 +100,50 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Custom responsive utilities for better mobile experience */
+  .mobile-compact {
+    @apply text-sm leading-tight;
+  }
+  
+  .mobile-padding {
+    @apply px-3 py-2 sm:px-4 sm:py-3;
+  }
+  
+  .mobile-text {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .mobile-button {
+    @apply h-8 w-8 p-0 sm:h-9 sm:w-9 sm:p-2;
+  }
+  
+  .mobile-icon {
+    @apply h-3 w-3 sm:h-4 sm:w-4;
+  }
+  
+  /* Responsive table improvements */
+  .table-responsive {
+    @apply min-w-full divide-y divide-border;
+  }
+  
+  .table-mobile-stack {
+    @apply flex flex-col space-y-3 sm:table sm:space-y-0;
+  }
+  
+  /* Mobile-first breakpoint adjustments */
+  @media (max-width: 640px) {
+    .container {
+      @apply px-4;
+    }
+    
+    .card-mobile {
+      @apply rounded-lg shadow-sm border;
+    }
+    
+    .form-mobile {
+      @apply space-y-3;
+    }
+  }
+}

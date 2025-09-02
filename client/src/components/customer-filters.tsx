@@ -19,8 +19,9 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
   return (
     <Card className="mb-6">
       <CardContent className="p-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <div>
+        <div className="space-y-4">
+          {/* Primary search - full width on mobile */}
+          <div className="w-full">
             <Label htmlFor="search" className="block text-sm font-medium text-foreground mb-2">
               Search Customers
             </Label>
@@ -39,50 +40,54 @@ export default function CustomerFilters({ filters, onFilterChange, onClearFilter
             </div>
           </div>
           
-          <div>
-            <Label htmlFor="city-filter" className="block text-sm font-medium text-foreground mb-2">
-              City
-            </Label>
-            <Input
-              id="city-filter"
-              data-testid="input-city"
-              placeholder="Filter by city..."
-              value={filters.city}
-              onChange={(e) => onFilterChange({ city: e.target.value })}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="state-filter" className="block text-sm font-medium text-foreground mb-2">
-              State
-            </Label>
-            <Input
-              id="state-filter"
-              data-testid="input-state"
-              placeholder="Filter by state..."
-              value={filters.state}
-              onChange={(e) => onFilterChange({ state: e.target.value })}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="pincode-filter" className="block text-sm font-medium text-foreground mb-2">
-              Pincode
-            </Label>
-            <Input
-              id="pincode-filter"
-              data-testid="input-pincode"
-              placeholder="Filter by pincode..."
-              value={filters.pinCode}
-              onChange={(e) => onFilterChange({ pinCode: e.target.value })}
-            />
-          </div>
-          
-          <div className="flex items-end">
-            <Button variant="outline" className="w-full" onClick={onClearFilters} data-testid="button-clear-filters">
-              <X className="mr-2 h-4 w-4" />
-              Clear All
-            </Button>
+          {/* Additional filters - responsive grid */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <Label htmlFor="city-filter" className="block text-sm font-medium text-foreground mb-2">
+                City
+              </Label>
+              <Input
+                id="city-filter"
+                data-testid="input-city"
+                placeholder="Filter by city..."
+                value={filters.city}
+                onChange={(e) => onFilterChange({ city: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="state-filter" className="block text-sm font-medium text-foreground mb-2">
+                State
+              </Label>
+              <Input
+                id="state-filter"
+                data-testid="input-state"
+                placeholder="Filter by state..."
+                value={filters.state}
+                onChange={(e) => onFilterChange({ state: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="pincode-filter" className="block text-sm font-medium text-foreground mb-2">
+                Pincode
+              </Label>
+              <Input
+                id="pincode-filter"
+                data-testid="input-pincode"
+                placeholder="Filter by pincode..."
+                value={filters.pinCode}
+                onChange={(e) => onFilterChange({ pinCode: e.target.value })}
+              />
+            </div>
+            
+            <div className="flex items-end">
+              <Button variant="outline" className="w-full" onClick={onClearFilters} data-testid="button-clear-filters">
+                <X className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Clear All</span>
+                <span className="sm:hidden">Clear</span>
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

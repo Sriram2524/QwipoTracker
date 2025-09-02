@@ -116,12 +116,12 @@ export default function CustomerList({
     <>
       <Card className="overflow-hidden">
         <div className={`${compactView ? 'px-4 py-2' : 'px-6 py-4'} border-b border-border`}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h3 className="text-lg font-medium text-foreground">Customer List</h3>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <span className="text-sm text-muted-foreground hidden sm:inline">Sort by:</span>
               <Select value={`${sortBy}-${sortOrder}`} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-48" data-testid="select-sort">
+                <SelectTrigger className="w-full sm:w-48" data-testid="select-sort">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,9 +139,9 @@ export default function CustomerList({
             <TableHeader>
               <TableRow className="bg-muted">
                 <TableHead className="text-muted-foreground">Customer</TableHead>
-                <TableHead className="text-muted-foreground">Phone Number</TableHead>
-                <TableHead className="text-muted-foreground">Addresses</TableHead>
-                <TableHead className="text-muted-foreground">Location</TableHead>
+                <TableHead className="text-muted-foreground hidden sm:table-cell">Phone Number</TableHead>
+                <TableHead className="text-muted-foreground hidden md:table-cell">Addresses</TableHead>
+                <TableHead className="text-muted-foreground hidden lg:table-cell">Location</TableHead>
                 <TableHead className="text-right text-muted-foreground">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -184,22 +184,33 @@ export default function CustomerList({
                               </span>
                             </div>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-foreground" data-testid={`text-customer-name-${customer.id}`}>
+                          <div className="ml-4 min-w-0 flex-1">
+                            <div className="text-sm font-medium text-foreground truncate" data-testid={`text-customer-name-${customer.id}`}>
                               {customer.firstName} {customer.lastName}
                             </div>
                             <div className="text-sm text-muted-foreground" data-testid={`text-customer-id-${customer.id}`}>
                               ID: #{customer.id}
                             </div>
+                            {/* Show additional info on mobile */}
+                            <div className="sm:hidden mt-1 space-y-1">
+                              <div className="text-xs text-muted-foreground font-mono">
+                                {customer.phoneNumber}
+                              </div>
+                              {customer.addresses.length > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  {location.city}, {location.state} • {getAddressDisplay(customer.addresses)}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <div className="text-sm text-foreground font-mono" data-testid={`text-phone-${customer.id}`}>
                           {customer.phoneNumber}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <Badge 
                           variant={customer.addresses.length === 1 ? "secondary" : "default"}
                           data-testid={`badge-address-count-${customer.id}`}
@@ -207,7 +218,7 @@ export default function CustomerList({
                           {getAddressDisplay(customer.addresses)}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         <div className="text-sm text-foreground" data-testid={`text-location-${customer.id}`}>
                           {location.city}, {location.state}
                         </div>
@@ -216,15 +227,15 @@ export default function CustomerList({
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-end space-x-1 sm:space-x-2">
                           <Link href={`/customers/${customer.id}`}>
-                            <Button variant="ghost" size="sm" data-testid={`button-view-${customer.id}`}>
-                              <Eye className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" data-testid={`button-view-${customer.id}`} className="h-8 w-8 p-0 sm:h-9 sm:w-9 sm:p-2">
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           </Link>
                           <Link href={`/customers/${customer.id}/edit`}>
-                            <Button variant="ghost" size="sm" data-testid={`button-edit-${customer.id}`}>
-                              <Edit className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" data-testid={`button-edit-${customer.id}`} className="h-8 w-8 p-0 sm:h-9 sm:w-9 sm:p-2">
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           </Link>
                           <Button
@@ -233,8 +244,9 @@ export default function CustomerList({
                             onClick={() => handleDeleteClick(customer.id)}
                             disabled={deleteCustomerMutation.isPending}
                             data-testid={`button-delete-${customer.id}`}
+                            className="h-8 w-8 p-0 sm:h-9 sm:w-9 sm:p-2"
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
                           </Button>
                         </div>
                       </TableCell>

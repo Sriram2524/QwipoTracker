@@ -180,9 +180,9 @@ export default function CustomerFormPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Breadcrumb */}
-      <nav className="flex mb-6" aria-label="Breadcrumb">
+      <nav className="flex mb-4 sm:mb-6" aria-label="Breadcrumb">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
             <a href="#" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary">
@@ -210,7 +210,7 @@ export default function CustomerFormPage() {
       </nav>
 
       {/* Back Button */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <Button variant="ghost" onClick={() => setLocation(isEdit ? `/customers/${customerId}` : "/customers")} data-testid="button-back">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
@@ -218,17 +218,17 @@ export default function CustomerFormPage() {
       </div>
 
       {/* Form */}
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>{isEdit ? "Edit Customer" : "Add New Customer"}</CardTitle>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-lg sm:text-xl">{isEdit ? "Edit Customer" : "Add New Customer"}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
               {/* Customer Information */}
               <div>
-                <h4 className="text-md font-medium text-foreground mb-4">Customer Information</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h4 className="text-sm sm:text-md font-medium text-foreground mb-3 sm:mb-4">Customer Information</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <FormField
                     control={form.control}
                     name="firstName"
@@ -259,7 +259,7 @@ export default function CustomerFormPage() {
                       </FormItem>
                     )}
                   />
-                  <div className="md:col-span-2">
+                  <div className="sm:col-span-2">
                     <FormField
                       control={form.control}
                       name="phoneNumber"
@@ -281,10 +281,10 @@ export default function CustomerFormPage() {
 
               {/* Primary Address Information */}
               <div>
-                <h4 className="text-md font-medium text-foreground mb-4">
-                  {isEdit ? "Primary Address" : "Primary Address"}
+                <h4 className="text-sm sm:text-md font-medium text-foreground mb-3 sm:mb-4">
+                  Primary Address
                 </h4>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <FormField
                     control={form.control}
                     name="addressDetails"
