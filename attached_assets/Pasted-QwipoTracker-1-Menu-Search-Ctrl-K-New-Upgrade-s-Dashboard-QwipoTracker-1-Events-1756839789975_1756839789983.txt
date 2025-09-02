@@ -1,0 +1,87 @@
+QwipoTracker-1
+Menu
+
+Search
+Ctrl+
+K
+
+New
+
+Upgrade
+
+
+s
+Dashboard
+QwipoTracker-1
+Events
+Settings
+Monitor
+Logs
+Metrics
+Manage
+Environment
+Shell
+Scaling
+Previews
+Disks
+Jobs
+
+Changelog
+Invite a friend
+
+Contact support
+Render Status
+Web Service
+QwipoTracker-1
+Node
+Free
+Upgrade your instance
+
+Connect
+
+Manual Deploy
+Service ID:
+srv-d2rjuki4d50c73c1l7t0
+
+Sriram2524 / QwipoTracker
+main
+https://qwipotracker-1.onrender.com
+
+Your free instance will spin down with inactivity, which can delay requests by 50 seconds or more.
+Upgrade now
+September 3, 2025 at 12:32 AM
+failed
+4b9543d
+Improve deployment configuration for faster builds Simplify the build command in render.yaml to use a single line execution for npm install and npm run build. Replit-Commit-Author: Agent Replit-Commit-Session-Id: 89758427-4f4f-48bd-afe9-f9c05b286fa4 Replit-Commit-Checkpoint-Type: full_checkpoint Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/6eaeefb2-597c-4d1a-abc9-b439cfc4e612/89758427-4f4f-48bd-afe9-f9c05b286fa4/qMGgTof
+
+Rollback
+Exited with status 127 while building your code.
+Read our docs for common ways to troubleshoot your deploy.
+
+All logs
+Search
+Search
+
+Live tail
+GMT+5:30
+
+Menu
+
+==> Cloning from https://github.com/Sriram2524/QwipoTracker
+==> Checking out commit 4b9543d3a467b57e1cb353ea6bec56fa33c26b23 in branch main
+==> Requesting Node.js version 20
+==> Using Node.js version 20.19.4 via /opt/render/project/src/.nvmrc
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install; npm run build'...
+added 372 packages, and audited 373 packages in 6s
+52 packages are looking for funding
+  run `npm fund` for details
+3 low severity vulnerabilities
+To address all issues, run:
+  npm audit fix
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+sh: 1: vite: not found
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
