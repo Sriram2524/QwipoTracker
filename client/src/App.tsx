@@ -18,9 +18,9 @@ function Router() {
       <Switch>
         <Route path="/" component={CustomersPage} />
         <Route path="/customers" component={CustomersPage} />
-        <Route path="/customers/:id" component={CustomerDetailPage} />
-        <Route path="/customers/:id/edit" component={CustomerFormPage} />
         <Route path="/customers/new" component={CustomerFormPage} />
+        <Route path="/customers/:id/edit" component={CustomerFormPage} />
+        <Route path="/customers/:id" component={CustomerDetailPage} />
         <Route path="/reports" component={ReportsPage} />
         <Route path="/settings" component={SettingsPage} />
         <Route component={NotFound} />
