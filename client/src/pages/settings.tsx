@@ -1,38 +1,30 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Settings, Bell, Shield, Palette } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/contexts/settings-context";
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [pageSize, setPageSize] = useState(10);
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [successMessages, setSuccessMessages] = useState(true);
-  const [autoLogout, setAutoLogout] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [compactView, setCompactView] = useState(false);
+  const { settings, updateSettings, resetSettings } = useSettings();
 
   const handleSaveSettings = () => {
-    // Here you would normally save to a backend or localStorage
-    localStorage.setItem('appSettings', JSON.stringify({
-      pageSize,
-      emailNotifications,
-      successMessages,
-      autoLogout,
-      deleteConfirmation,
-      darkMode,
-      compactView
-    }));
-    
     toast({
       title: "Settings Saved",
       description: "Your preferences have been successfully updated.",
+    });
+  };
+
+  const handleResetSettings = () => {
+    resetSettings();
+    toast({
+      title: "Settings Reset",
+      description: "All settings have been reset to default values.",
     });
   };
 
@@ -75,15 +67,36 @@ export default function SettingsPage() {
                 <Input 
                   id="page-size" 
                   type="number" 
-                  value={pageSize} 
-                  onChange={(e) => setPageSize(parseInt(e.target.value))} 
+                  value={settings.pageSize} 
+                  onChange={(e) => updateSettings({ pageSize: parseInt(e.target.value) || 10 })} 
                   min="5" 
                   max="50" 
                 />
               </div>
               <div>
                 <Label htmlFor="default-sort">Default sort order</Label>
-                <Input id="default-sort" defaultValue="First Name (A-Z)" readOnly />
+                <Select 
+                  value={`${settings.defaultSortBy}-${settings.defaultSortOrder}`} 
+                  onValueChange={(value) => {
+                    const [sortBy, sortOrder] = value.split('-');
+                    updateSettings({ 
+                      defaultSortBy: sortBy, 
+                      defaultSortOrder: sortOrder as 'asc' | 'desc' 
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="firstName-asc">First Name (A-Z)</SelectItem>
+                    <SelectItem value="firstName-desc">First Name (Z-A)</SelectItem>
+                    <SelectItem value="lastName-asc">Last Name (A-Z)</SelectItem>
+                    <SelectItem value="lastName-desc">Last Name (Z-A)</SelectItem>
+                    <SelectItem value="phoneNumber-asc">Phone Number (A-Z)</SelectItem>
+                    <SelectItem value="phoneNumber-desc">Phone Number (Z-A)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardContent>
@@ -103,14 +116,14 @@ export default function SettingsPage() {
                 <Label>Email notifications</Label>
                 <p className="text-sm text-muted-foreground">Receive email updates when customers are added</p>
               </div>
-              <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+              <Switch checked={settings.emailNotifications} onCheckedChange={(checked) => updateSettings({ emailNotifications: checked })} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Success messages</Label>
                 <p className="text-sm text-muted-foreground">Show success toasts for actions</p>
               </div>
-              <Switch checked={successMessages} onCheckedChange={setSuccessMessages} />
+              <Switch checked={settings.successMessages} onCheckedChange={(checked) => updateSettings({ successMessages: checked })} />
             </div>
           </CardContent>
         </Card>
@@ -129,14 +142,14 @@ export default function SettingsPage() {
                 <Label>Auto-logout</Label>
                 <p className="text-sm text-muted-foreground">Automatically log out after inactivity</p>
               </div>
-              <Switch checked={autoLogout} onCheckedChange={setAutoLogout} />
+              <Switch checked={settings.autoLogout} onCheckedChange={(checked) => updateSettings({ autoLogout: checked })} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Delete confirmation</Label>
                 <p className="text-sm text-muted-foreground">Require confirmation before deleting records</p>
               </div>
-              <Switch checked={deleteConfirmation} onCheckedChange={setDeleteConfirmation} />
+              <Switch checked={settings.deleteConfirmation} onCheckedChange={(checked) => updateSettings({ deleteConfirmation: checked })} />
             </div>
           </CardContent>
         </Card>
@@ -155,21 +168,22 @@ export default function SettingsPage() {
                 <Label>Dark mode</Label>
                 <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
               </div>
-              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+              <Switch checked={settings.darkMode} onCheckedChange={(checked) => updateSettings({ darkMode: checked })} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Compact view</Label>
                 <p className="text-sm text-muted-foreground">Use smaller spacing for better information density</p>
               </div>
-              <Switch checked={compactView} onCheckedChange={setCompactView} />
+              <Switch checked={settings.compactView} onCheckedChange={(checked) => updateSettings({ compactView: checked })} />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Save Button */}
-      <div className="mt-8 flex justify-end">
+      {/* Action Buttons */}
+      <div className="mt-8 flex justify-between">
+        <Button variant="outline" onClick={handleResetSettings}>Reset to Defaults</Button>
         <Button onClick={handleSaveSettings}>Save Settings</Button>
       </div>
     </div>

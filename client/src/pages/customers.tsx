@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSettings } from "@/contexts/settings-context";
 import CustomerList from "@/components/customer-list";
 import CustomerFilters from "@/components/customer-filters";
 
 export default function CustomersPage() {
+  const { settings } = useSettings();
+  
   const [filters, setFilters] = useState({
     search: "",
     city: "",
     state: "",
     pinCode: "",
     page: 1,
-    limit: 10,
-    sortBy: "firstName",
-    sortOrder: "asc" as "asc" | "desc",
+    limit: settings.pageSize,
+    sortBy: settings.defaultSortBy,
+    sortOrder: settings.defaultSortOrder,
   });
 
   const { data, isLoading, error } = useQuery({
@@ -50,9 +53,9 @@ export default function CustomersPage() {
       state: "",
       pinCode: "",
       page: 1,
-      limit: 10,
-      sortBy: "firstName",
-      sortOrder: "asc",
+      limit: settings.pageSize,
+      sortBy: settings.defaultSortBy,
+      sortOrder: settings.defaultSortOrder,
     });
   };
 
