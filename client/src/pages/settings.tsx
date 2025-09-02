@@ -69,8 +69,8 @@ export default function SettingsPage() {
                   type="number" 
                   value={settings.pageSize} 
                   onChange={(e) => updateSettings({ pageSize: parseInt(e.target.value) || 10 })} 
-                  min="5" 
-                  max="50" 
+                  min="1" 
+                  max="100" 
                 />
               </div>
               <div>
