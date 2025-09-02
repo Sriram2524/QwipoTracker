@@ -19,6 +19,7 @@ interface CustomerListProps {
   error: any;
   onPageChange: (page: number) => void;
   onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
+  compactView?: boolean;
 }
 
 export default function CustomerList({
@@ -30,6 +31,7 @@ export default function CustomerList({
   error,
   onPageChange,
   onSortChange,
+  compactView = false,
 }: CustomerListProps) {
   const [deleteCustomerId, setDeleteCustomerId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState("firstName");
@@ -81,7 +83,7 @@ export default function CustomerList({
   return (
     <>
       <Card className="overflow-hidden">
-        <div className="px-6 py-4 border-b border-border">
+        <div className={`${compactView ? 'px-4 py-2' : 'px-6 py-4'} border-b border-border`}>
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-foreground">Customer List</h3>
             <div className="flex items-center space-x-2">
@@ -213,7 +215,7 @@ export default function CustomerList({
 
         {/* Pagination */}
         {!isLoading && total > 0 && (
-          <div className="bg-card px-6 py-3 flex items-center justify-between border-t border-border">
+          <div className={`bg-card ${compactView ? 'px-4 py-2' : 'px-6 py-3'} flex items-center justify-between border-t border-border`}>
             <div className="flex-1 flex justify-between sm:hidden">
               <Button
                 variant="outline"

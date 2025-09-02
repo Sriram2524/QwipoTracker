@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Settings, Bell, Shield, Palette } from "lucide-react";
+import { ArrowLeft, Settings, Shield, Palette } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/contexts/settings-context";
@@ -102,31 +102,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bell className="mr-2 h-5 w-5" />
-              Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Email notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive email updates when customers are added</p>
-              </div>
-              <Switch checked={settings.emailNotifications} onCheckedChange={(checked) => updateSettings({ emailNotifications: checked })} />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Success messages</Label>
-                <p className="text-sm text-muted-foreground">Show success toasts for actions</p>
-              </div>
-              <Switch checked={settings.successMessages} onCheckedChange={(checked) => updateSettings({ successMessages: checked })} />
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Security */}
         <Card>
@@ -137,13 +112,6 @@ export default function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Auto-logout</Label>
-                <p className="text-sm text-muted-foreground">Automatically log out after inactivity</p>
-              </div>
-              <Switch checked={settings.autoLogout} onCheckedChange={(checked) => updateSettings({ autoLogout: checked })} />
-            </div>
             <div className="flex items-center justify-between">
               <div>
                 <Label>Delete confirmation</Label>

@@ -6,12 +6,7 @@ export interface AppSettings {
   defaultSortBy: string;
   defaultSortOrder: 'asc' | 'desc';
   
-  // Notifications
-  emailNotifications: boolean;
-  successMessages: boolean;
-  
   // Security
-  autoLogout: boolean;
   deleteConfirmation: boolean;
   
   // Appearance
@@ -23,9 +18,6 @@ const defaultSettings: AppSettings = {
   pageSize: 10,
   defaultSortBy: 'firstName',
   defaultSortOrder: 'asc',
-  emailNotifications: false,
-  successMessages: true,
-  autoLogout: false,
   deleteConfirmation: true,
   darkMode: false,
   compactView: false,
