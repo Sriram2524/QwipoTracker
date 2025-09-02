@@ -49,7 +49,7 @@ export default function CustomerFormPage() {
       const result = await response.json();
       return result.data;
     },
-    enabled: isEdit && !!customerId,
+    enabled: isEdit && !!customerId && !isNaN(customerId) && !isNew,
   });
 
   const form = useForm<CustomerFormData>({
@@ -162,7 +162,7 @@ export default function CustomerFormPage() {
     }
   };
 
-  if (isEdit && isLoading && !isNew) {
+  if (isEdit && isLoading && !!customerId && !isNaN(customerId) && !isNew) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Skeleton className="h-8 w-48 mb-6" />
