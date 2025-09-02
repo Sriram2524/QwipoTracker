@@ -5,6 +5,11 @@ import { insertCustomerSchema, updateCustomerSchema, insertAddressSchema, update
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for deployment monitoring
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // Customer routes
   
   // GET /api/customers - Get all customers with optional filters and pagination
