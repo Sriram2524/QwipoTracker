@@ -2,8 +2,11 @@ services:
   - type: web
     name: customer-management-app
     env: node
+    region: oregon
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: |
+      npm install
+      npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
