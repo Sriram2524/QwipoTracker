@@ -1,16 +1,16 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, serial, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const customers = sqliteTable("customers", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const customers = pgTable("customers", {
+  id: serial("id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phoneNumber: text("phone_number").notNull().unique(),
 });
 
-export const addresses = sqliteTable("addresses", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const addresses = pgTable("addresses", {
+  id: serial("id").primaryKey(),
   customerId: integer("customer_id").notNull().references(() => customers.id, { onDelete: "cascade" }),
   addressDetails: text("address_details").notNull(),
   city: text("city").notNull(),

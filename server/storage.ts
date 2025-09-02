@@ -1,4 +1,7 @@
-import { type Customer, type InsertCustomer, type UpdateCustomer, type Address, type InsertAddress, type UpdateAddress, type CustomerWithAddresses } from "@shared/schema";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { eq, and, or, like, desc, asc, count } from "drizzle-orm";
+import { customers, addresses, type Customer, type InsertCustomer, type UpdateCustomer, type Address, type InsertAddress, type UpdateAddress, type CustomerWithAddresses } from "@shared/schema";
 
 export interface IStorage {
   // Customer CRUD operations
@@ -23,6 +26,151 @@ export interface IStorage {
   createAddress(address: InsertAddress): Promise<Address>;
   updateAddress(id: number, address: UpdateAddress): Promise<Address | undefined>;
   deleteAddress(id: number): Promise<boolean>;
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
+
+const sql = neon(process.env.DATABASE_URL);
+const db = drizzle(sql);
+
+export class PostgreSQLStorage implements IStorage {
+  async getCustomer(id: number): Promise<Customer | undefined> {
+    const result = await db.select().from(customers).where(eq(customers.id, id));
+    return result[0];
+  }
+
+  async getCustomers(options?: {
+    search?: string;
+    city?: string;
+    state?: string;
+    pinCode?: string;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ customers: CustomerWithAddresses[]; total: number }> {
+    const { search, city, state, pinCode, page = 1, limit = 10, sortBy = 'firstName', sortOrder = 'asc' } = options || {};
+    
+    // Build where conditions
+    const conditions = [];
+    
+    if (search) {
+      const searchTerm = `%${search}%`;
+      conditions.push(
+        or(
+          like(customers.firstName, searchTerm),
+          like(customers.lastName, searchTerm),
+          like(customers.phoneNumber, searchTerm)
+        )
+      );
+    }
+
+    // Build the complete query
+    const orderDirection = sortOrder === 'desc' ? desc : asc;
+    let orderByColumn;
+    switch (sortBy) {
+      case 'lastName':
+        orderByColumn = orderDirection(customers.lastName);
+        break;
+      case 'phoneNumber':
+        orderByColumn = orderDirection(customers.phoneNumber);
+        break;
+      default:
+        orderByColumn = orderDirection(customers.firstName);
+    }
+
+    // Get total count
+    const totalResult = await db.select({ count: count() }).from(customers);
+    const total = totalResult[0]?.count || 0;
+
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    
+    let customerResults;
+    if (conditions.length > 0) {
+      customerResults = await db.select().from(customers)
+        .where(and(...conditions))
+        .orderBy(orderByColumn)
+        .limit(limit)
+        .offset(offset);
+    } else {
+      customerResults = await db.select().from(customers)
+        .orderBy(orderByColumn)
+        .limit(limit)
+        .offset(offset);
+    }
+
+    // Get addresses for each customer
+    const customersWithAddresses: CustomerWithAddresses[] = [];
+    for (const customer of customerResults) {
+      let customerAddresses = await db.select().from(addresses).where(eq(addresses.customerId, customer.id));
+      
+      // Filter addresses by location filters
+      if (city && city !== 'All Cities') {
+        customerAddresses = customerAddresses.filter(addr => addr.city.toLowerCase() === city.toLowerCase());
+      }
+      if (state && state !== 'All States') {
+        customerAddresses = customerAddresses.filter(addr => addr.state.toLowerCase() === state.toLowerCase());
+      }
+      if (pinCode) {
+        customerAddresses = customerAddresses.filter(addr => addr.pinCode.includes(pinCode));
+      }
+
+      // Only include customer if they have matching addresses (when location filters are applied)
+      if ((city && city !== 'All Cities') || (state && state !== 'All States') || pinCode) {
+        if (customerAddresses.length > 0) {
+          customersWithAddresses.push({ ...customer, addresses: customerAddresses });
+        }
+      } else {
+        customersWithAddresses.push({ ...customer, addresses: customerAddresses });
+      }
+    }
+
+    return { customers: customersWithAddresses, total: customersWithAddresses.length };
+  }
+
+  async createCustomer(customer: InsertCustomer): Promise<Customer> {
+    const result = await db.insert(customers).values(customer).returning();
+    return result[0];
+  }
+
+  async updateCustomer(id: number, customer: UpdateCustomer): Promise<Customer | undefined> {
+    const result = await db.update(customers).set(customer).where(eq(customers.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteCustomer(id: number): Promise<boolean> {
+    // Delete associated addresses first due to foreign key constraints
+    await db.delete(addresses).where(eq(addresses.customerId, id));
+    const result = await db.delete(customers).where(eq(customers.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getAddress(id: number): Promise<Address | undefined> {
+    const result = await db.select().from(addresses).where(eq(addresses.id, id));
+    return result[0];
+  }
+
+  async getCustomerAddresses(customerId: number): Promise<Address[]> {
+    return await db.select().from(addresses).where(eq(addresses.customerId, customerId));
+  }
+
+  async createAddress(address: InsertAddress): Promise<Address> {
+    const result = await db.insert(addresses).values(address).returning();
+    return result[0];
+  }
+
+  async updateAddress(id: number, address: UpdateAddress): Promise<Address | undefined> {
+    const result = await db.update(addresses).set(address).where(eq(addresses.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteAddress(id: number): Promise<boolean> {
+    const result = await db.delete(addresses).where(eq(addresses.id, id));
+    return result.rowCount > 0;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -233,4 +381,57 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Create PostgreSQL storage instance
+const postgresStorage = new PostgreSQLStorage();
+
+// Seed sample data if database is empty
+async function seedDatabase() {
+  try {
+    const { customers: existingCustomers } = await postgresStorage.getCustomers({ limit: 1 });
+    
+    if (existingCustomers.length === 0) {
+      console.log("Seeding database with sample data...");
+      
+      const sampleCustomers = [
+        { firstName: "John", lastName: "Doe", phoneNumber: "+91 98765 43210" },
+        { firstName: "Jane", lastName: "Smith", phoneNumber: "+91 87654 32109" },
+        { firstName: "Raj", lastName: "Patel", phoneNumber: "+91 76543 21098" },
+        { firstName: "Priya", lastName: "Sharma", phoneNumber: "+91 65432 10987" },
+        { firstName: "Michael", lastName: "Johnson", phoneNumber: "+91 54321 09876" },
+      ];
+
+      const sampleAddresses = [
+        [{ addressDetails: "123 Main Street, Andheri West", city: "Mumbai", state: "Maharashtra", pinCode: "400058" }],
+        [{ addressDetails: "456 Park Avenue, Connaught Place", city: "Delhi", state: "Delhi", pinCode: "110001" },
+         { addressDetails: "789 Shopping Complex, Karol Bagh", city: "Delhi", state: "Delhi", pinCode: "110005" }],
+        [{ addressDetails: "321 Tech Hub, Electronic City", city: "Bangalore", state: "Karnataka", pinCode: "560100" }],
+        [{ addressDetails: "654 Residency Road, T Nagar", city: "Chennai", state: "Tamil Nadu", pinCode: "600017" },
+         { addressDetails: "987 Beach Road, Marina", city: "Chennai", state: "Tamil Nadu", pinCode: "600013" },
+         { addressDetails: "147 IT Park, Velachery", city: "Chennai", state: "Tamil Nadu", pinCode: "600042" }],
+        [{ addressDetails: "258 Business District, Bandra", city: "Mumbai", state: "Maharashtra", pinCode: "400050" }],
+      ];
+
+      for (let i = 0; i < sampleCustomers.length; i++) {
+        const customer = await postgresStorage.createCustomer(sampleCustomers[i]);
+        
+        if (sampleAddresses[i]) {
+          for (const addressData of sampleAddresses[i]) {
+            await postgresStorage.createAddress({
+              ...addressData,
+              customerId: customer.id
+            });
+          }
+        }
+      }
+      
+      console.log("Database seeded successfully!");
+    }
+  } catch (error) {
+    console.error("Error seeding database:", error);
+  }
+}
+
+// Initialize and seed database
+seedDatabase();
+
+export const storage = postgresStorage;
